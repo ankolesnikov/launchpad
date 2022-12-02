@@ -6,9 +6,9 @@ resource "azurerm_resource_group" "rg" {
   location = var.location
 
   tags = merge(
-    map(
-      "Name", format("%s-rg", var.cluster_name)
-    ),
+    tomap({
+      "Name" = format("%s-rg", var.cluster_name)
+    }),
     var.tags
   )
 
@@ -27,10 +27,10 @@ resource "azurerm_virtual_network" "vnet" {
   resource_group_name = azurerm_resource_group.rg.name
 
   tags = merge(
-    map(
-      "Name", format("%s-vnet", var.cluster_name),
-      "Environment", format("%s", azurerm_resource_group.rg.name)
-    ),
+    tomap({
+      "Name" = format("%s-vnet", var.cluster_name),
+      "Environment" = format("%s", azurerm_resource_group.rg.name)
+    }),
     var.tags
   )
 }

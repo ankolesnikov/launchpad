@@ -1,39 +1,43 @@
-resource "aws_security_group" "worker" {
-  name        = "${var.cluster_name}-win-workers"
-  description = "mke cluster windows workers"
-  vpc_id      = var.vpc_id
-
-  ingress {
-    from_port   = 5985
-    to_port     = 5986
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+resource "google_compute_firewall" "winrm" {
+  name        = "${var.cluster_name}-win-worker"
+  description = "winrm access for windows workers"
+  network     = var.vpc_name
+  direction   = "INGRESS"
+  allow {
+    protocol = "tcp"
+    ports    = ["5985-5990"]
   }
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["allow-winrm"]
 }
 
-locals {
-  subnet_count = length(var.subnet_ids)
+resource "google_compute_firewall" "rdp" {
+  name        = "${var.cluster_name}-win-rdp"
+  description = "rdp access for windows workers"
+  network     = var.vpc_name
+  direction   = "INGRESS"
+  allow {
+    protocol = "tcp"
+    ports    = ["3389"]
+  }
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["allow-rdp"]
 }
 
-resource "aws_instance" "mke_worker" {
+resource "google_compute_instance" "mke_win_worker" {
   count = var.worker_count
 
-  tags = tomap({
-    "Name" = "${var.cluster_name}-win-worker-${count.index + 1}",
-    "Role" = "worker",
-    (var.kube_cluster_tag) = "shared"
-  })
+  name         = "${var.cluster_name}-win-worker-${count.index + 1}"
+  machine_type = var.worker_type
+  zone         = var.gcp_zone
+  metadata = tomap({
+    role                       = "worker"
+    windows-startup-script-ps1 = <<EOF
 
-  instance_type          = var.worker_type
-  iam_instance_profile   = var.instance_profile_name
-  ami                    = var.image_id
-  vpc_security_group_ids = [var.security_group_id, aws_security_group.worker.id]
-  subnet_id              = var.subnet_ids[count.index % local.subnet_count]
-  ebs_optimized          = true
-  user_data              = <<EOF
-<powershell>
-$admin = [adsi]("WinNT://./administrator, user")
-$admin.psbase.invoke("SetPassword", "${var.windows_administrator_password}")
+# Create a user in Administrators group
+net user ${var.windows_user} "${var.windows_password}" /ADD /Y
+NET LOCALGROUP "Administrators" ${var.windows_user} /ADD
+Write-Output "User '${var.windows_user}' created"
 
 # Snippet to enable WinRM over HTTPS with a self-signed certificate
 # from https://gist.github.com/TechIsCool/d65017b8427cfa49d579a6d7b6e03c93
@@ -80,26 +84,54 @@ Write-Output "Restarting WinRM Service..."
 Stop-Service WinRM
 Set-Service WinRM -StartupType "Automatic"
 Start-Service WinRM
-</powershell>
 EOF
 
+  })
 
-  lifecycle {
-    ignore_changes = [ami]
+  boot_disk {
+    initialize_params {
+      image = var.image_name
+      type  = var.worker_volume_type
+      size  = var.worker_volume_size
+    }
   }
 
-  root_block_device {
-    volume_type = "gp2"
-    volume_size = var.worker_volume_size
+  network_interface {
+    network    = var.vpc_name
+    subnetwork = var.subnetwork_name
+    access_config {
+    }
   }
 
-  connection {
-    type = "winrm"
-    user = "Administrator"
-    password = var.administrator_password
-    timeout = "10m"
-    https = "true"
-    insecure = "true"
-    port=5986
+  tags = [
+    var.cluster_name,
+    "allow-rdp",
+    "allow-winrm",
+    "allow-worker",
+    "allow-internal"
+  ]
+
+  service_account {
+    email = var.service_account_email
+    scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      host     = self.network_interface.0.access_config.0.nat_ip
+      type     = "winrm"
+      user     = var.windows_user
+      password = var.windows_password
+      timeout  = "10m"
+      https    = "true"
+      insecure = "true"
+      port     = 5986
+    }
+
+    inline = [
+      "ECHO hello"
+    ]
   }
 }

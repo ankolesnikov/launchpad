@@ -24,10 +24,10 @@ resource azurerm_network_security_group "cluster_nsg" {
   resource_group_name = var.rg
 
   tags = merge(
-    map(
-      "Name", format("%s-cluster-nsg", var.cluster_name),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-cluster-nsg", var.cluster_name),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -67,10 +67,10 @@ resource "azurerm_storage_account" "kubernetes_storage" {
   account_replication_type = "LRS"
 
   tags = merge(
-    map(
-      "Name", format("%s-kube-storage", var.cluster_name),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-kube-storage", var.cluster_name),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }

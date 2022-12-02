@@ -1,18 +1,18 @@
 locals {
   managers = [
     for ip in module.masters.public_ips : {
-      address = ip
       ssh: {
+        address = ip
         user    		= "ubuntu"
         keyPath 	= "./ssh_keys/${var.cluster_name}"
         port			 	= 22
       }
       role    = "manager"
       privateInterface = "ens3"
-      engineConfig: {
-        bip: "${var.docker_int_net}"
+      mcrConfig: {
+        bip: var.docker_int_net
         default-address-pools: {
-          base: "${var.docker_default_address_pool}"
+          base: var.docker_default_address_pool
         }
       }
       environment : {
@@ -23,18 +23,18 @@ locals {
   ]
   workers = [
     for ip in module.workers.public_ips : {
-      address = ip
       ssh: {
+        address = ip
         user    		= "ubuntu"
         keyPath 	= "./ssh_keys/${var.cluster_name}"
         port    		= 22
       }
       role    = "worker"
       privateInterface = "ens3"
-      engineConfig: {
-        bip: "${var.docker_int_net}"
+      mcrConfig: {
+        bip: var.docker_int_net
         default-address-pools: {
-          base: "${var.docker_default_address_pool}"
+          base: var.docker_default_address_pool
         }
       }
       environment : {
@@ -44,7 +44,7 @@ locals {
     }
   ]
   launchpad_tmpl = {
-    apiVersion = "launchpad.mirantis.com/mke/v1.1"
+    apiVersion = "launchpad.mirantis.com/mke/v1.3"
     kind = "mke"
     metadata = {
       name = "mkecluster"
@@ -64,7 +64,7 @@ locals {
           configFile = var.provider_config_file_path
         }
       }
-      engine = {
+      mcr = {
         version = var.docker_engine_version
         channel = "stable"
         repoURL = "https://repos.mirantis.com"

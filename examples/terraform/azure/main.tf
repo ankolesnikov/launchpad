@@ -76,8 +76,8 @@ module "windows_workers" {
 locals {
   managers = [
     for ip in module.masters.public_ips : {
-      address = ip
       ssh = {
+        address = ip
         user    = "ubuntu"
         keyPath = "./ssh_keys/${var.cluster_name}.pem"
       }
@@ -87,8 +87,8 @@ locals {
   ]
   workers = [
     for ip in module.workers.public_ips : {
-      address = ip
       ssh = {
+        address = ip
         user    = "ubuntu"
         keyPath = "./ssh_keys/${var.cluster_name}.pem"
       }
@@ -98,8 +98,8 @@ locals {
   ]
   windows_workers = [
     for ip in module.windows_workers.public_ips : {
-      address = ip
       winRM = {
+        address = ip
         user     = var.windows_admin_username
         password = module.windows_workers.windows_password
         useHTTPS = true
@@ -113,13 +113,14 @@ locals {
 
 locals {
   launchpad_tmpl = {
-    apiVersion = "launchpad.mirantis.com/mke/v1.1"
+    apiVersion = "launchpad.mirantis.com/mke/v1.3"
     kind       = "mke"
     metadata = {
       name = var.cluster_name
     }
     spec = {
       mke = {
+        version       = var.mke_version
         adminUsername = "admin"
         adminPassword = var.admin_password
         installFlags : [

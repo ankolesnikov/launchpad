@@ -1,10 +1,10 @@
 locals {
   managers = [
     for host in module.managers.machines : {
-      address          = host.default_ip_address
       role             = "manager"
       privateInterface = "ens5" # Is this supposed to be a constant?
       ssh = {
+        address = host.default_ip_address
         user    = "ubuntu" # "TODO: Probably make this a variable"
         keyPath = var.ssh_private_key_file
       }
@@ -12,10 +12,10 @@ locals {
   ]
   workers = [
     for host in module.workers.machines : {
-      address          = host.default_ip_address
       role             = "worker"
       privateInterface = "ens5" # Is this supposed to be a constant?
       ssh = {
+        address = host.default_ip_address
         user    = "ubuntu" # "TODO: Probably make this a variable"
         keyPath = var.ssh_private_key_file
       }
@@ -23,17 +23,17 @@ locals {
   ]
   # workers_windows = [
   #   for host in module.workers_windows.machines : {
-  #     address = host.public_ip
   #     role    = "worker"
   #     privateInterface = "Ethernet 2" # Is this supposed to be a constant?
   #     ssh = {
+  #       address = host.public_ip
   #       user    = "administrator" # "TODO: Probably make this a variable"
   #       keyPath = var.ssh_private_key_file
   #     }
   #   }
   # ]
   launchpad_tmpl = {
-    apiVersion = "launchpad.mirantis.com/mke/v1.1"
+    apiVersion = "launchpad.mirantis.com/mke/v1.3"
     kind       = "mke"
     spec = {
       mke = {

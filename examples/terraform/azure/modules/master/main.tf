@@ -17,10 +17,10 @@ resource azurerm_network_security_group "master_nsg" {
   resource_group_name = var.rg
 
   tags = merge(
-    map(
-      "Name", format("%s-master-nsg", var.cluster_name),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-master-nsg", var.cluster_name),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -87,10 +87,10 @@ resource "azurerm_lb" "master_public_lb" {
   }
 
   tags = merge(
-    map(
-      "Name", format("%s-mke-LB", var.cluster_name),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-mke-LB", var.cluster_name),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -170,10 +170,10 @@ resource "azurerm_public_ip" "mke_lb_pub_ip" {
   domain_name_label = format("mke-%s-%s", lower(replace(var.rg, "/[^a-zA-Z0-9]/", "")), lower(random_string.pub_ip_salt[0].result))
 
   tags = merge(
-    map(
-      "Name", "mke-LB-FrontendIP",
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = "mke-LB-FrontendIP",
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -203,10 +203,10 @@ resource "azurerm_network_interface" "netif_public" {
   }
 
   tags = merge(
-    map(
-      "Name", format("%s-master-Net-%s", var.cluster_name, count.index + 1),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-master-Net-%s", var.cluster_name, count.index + 1),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -228,10 +228,10 @@ resource "azurerm_public_ip" "master_public_ips" {
   allocation_method   = "Static"
 
   tags = merge(
-    map(
-      "Name", format("%s-master-PublicIP-%d", var.cluster_name, count.index + 1),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-master-PublicIP-%d", var.cluster_name, count.index + 1),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -248,10 +248,10 @@ resource "azurerm_availability_set" "master_avset" {
   platform_update_domain_count = var.update_domain_count
   managed                      = true
   tags = merge(
-    map(
-      "Name", format("%s-master-avset", var.cluster_name),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-master-avset", var.cluster_name),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -327,11 +327,11 @@ EOF
   }
 
   tags = merge(
-    map(
-      "Name", format("%s%03d", "master-", (count.index + 1)),
-      "Environment", format("%s", var.rg),
-      "Role", "master",
-    ),
+    tomap({
+      "Name" = format("%s%03d", "master-", (count.index + 1)),
+      "Environment" = format("%s", var.rg),
+      "Role" = "master",
+    }),
     var.tags
   )
 }

@@ -61,6 +61,11 @@ variable "worker_volume_size" {
 variable "msr_volume_size" {
   default = 100
 }
+
 variable "windows_administrator_password" {
   default = "w!ndozePassw0rd"
+}
+
+variable "mke_version" {
+  default = "3.5.5"
 }

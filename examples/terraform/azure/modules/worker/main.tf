@@ -17,10 +17,10 @@ resource azurerm_network_security_group "worker_nsg" {
   resource_group_name = var.rg
 
   tags = merge(
-    map(
-      "Name", format("%s-worker-nsg", var.cluster_name),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-worker-nsg", var.cluster_name),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -87,10 +87,10 @@ resource "azurerm_lb" "worker_public_lb" {
   }
 
   tags = merge(
-    map(
-      "Name", format("%s-worker-LB", var.cluster_name),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-worker-LB", var.cluster_name),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -170,10 +170,10 @@ resource "azurerm_public_ip" "worker_lb_pub_ip" {
   domain_name_label = format("worker-%s-%s", lower(replace(var.rg, "/[^a-zA-Z0-9]/", "")), lower(random_string.pub_ip_salt[0].result))
 
   tags = merge(
-    map(
-      "Name", "worker-LB-FrontendIP",
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = "worker-LB-FrontendIP",
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -203,10 +203,10 @@ resource "azurerm_network_interface" "netif_public" {
   }
 
   tags = merge(
-    map(
-      "Name", format("%s-worker-Net-%s", var.cluster_name, count.index + 1),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-worker-Net-%s", var.cluster_name, count.index + 1),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -228,10 +228,10 @@ resource "azurerm_public_ip" "worker_public_ips" {
   allocation_method   = "Static"
 
   tags = merge(
-    map(
-      "Name", format("%s-worker-PublicIP-%d", var.cluster_name, count.index + 1),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-worker-PublicIP-%d", var.cluster_name, count.index + 1),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -248,10 +248,10 @@ resource "azurerm_availability_set" "worker_avset" {
   platform_update_domain_count = var.update_domain_count
   managed                      = true
   tags = merge(
-    map(
-      "Name", format("%s-worker-avset", var.cluster_name),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-worker-avset", var.cluster_name),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -327,11 +327,11 @@ EOF
   }
 
   tags = merge(
-    map(
-      "Name", format("%s%03d", "worker-", (count.index + 1)),
-      "Environment", format("%s", var.rg),
-      "Role", "worker",
-    ),
+    tomap({
+      "Name" = format("%s%03d", "worker-", (count.index + 1)),
+      "Environment" = format("%s", var.rg),
+      "Role" = "worker",
+    }),
     var.tags
   )
 }

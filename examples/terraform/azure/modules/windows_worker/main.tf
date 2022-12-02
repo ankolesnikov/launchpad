@@ -23,10 +23,10 @@ resource azurerm_network_security_group "win_worker_nsg" {
   resource_group_name = var.rg
 
   tags = merge(
-    map(
-      "Name", format("%s-win-worker-nsg", var.cluster_name),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-win-worker-nsg", var.cluster_name),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -89,10 +89,10 @@ resource "azurerm_network_interface" "netif_public" {
   }
 
   tags = merge(
-    map(
-      "Name", format("%s-win-worker-Net-%s", var.cluster_name, count.index + 1),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-win-worker-Net-%s", var.cluster_name, count.index + 1),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -114,10 +114,10 @@ resource "azurerm_public_ip" "win_worker_public_ips" {
   allocation_method   = "Static"
 
   tags = merge(
-    map(
-      "Name", format("%s-win-worker-PublicIP-%d", var.cluster_name, count.index + 1),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-win-worker-PublicIP-%d", var.cluster_name, count.index + 1),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -134,10 +134,10 @@ resource "azurerm_availability_set" "win_worker_avset" {
   platform_update_domain_count = var.update_domain_count
   managed                      = true
   tags = merge(
-    map(
-      "Name", format("%s-win-worker-avset", var.cluster_name),
-      "Environment", format("%s", var.rg)
-    ),
+    tomap({
+      "Name" = format("%s-win-worker-avset", var.cluster_name),
+      "Environment" = format("%s", var.rg)
+    }),
     var.tags
   )
 }
@@ -247,11 +247,11 @@ EOF
   }
 
   tags = merge(
-    map(
-      "Name", format("%s%03d", "win-worker-", (count.index + 1)),
-      "Environment", format("%s", var.rg),
-      "Role", "worker",
-    ),
+    tomap({
+      "Name" = format("%s%03d", "win-worker-", (count.index + 1)),
+      "Environment" = format("%s", var.rg),
+      "Role" = "worker",
+    }),
     var.tags
   )
 }

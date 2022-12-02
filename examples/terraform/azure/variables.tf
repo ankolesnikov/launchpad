@@ -96,3 +96,7 @@ variable "update_domain_count" {
   description = "Specifies the number of update domains that are used"
   default     = 2
 }
+
+variable "mke_version" {
+  default = "3.5.5"
+}
